@@ -15,6 +15,9 @@ export function AuthProvider({ children }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+    }).catch((err) => {
+      console.error('Auth initialization error:', err);
+    }).finally(() => {
       setLoading(false);
     });
 
