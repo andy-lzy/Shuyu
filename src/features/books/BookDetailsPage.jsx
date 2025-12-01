@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Heart, Plus, Edit, Trash2, Loader2, Save, Sparkles } from 'lucide-react';
-import { getBookById, updateBook, deleteBook } from '../../services/bookService';
+import { ArrowLeft, BookOpen, Heart, Plus, Trash2, Loader2, Sparkles, Calendar, Hash, BookMarked } from 'lucide-react';
+import { getBookById, deleteBook } from '../../services/bookService';
 import { getNuggetsByBook } from '../../services/nuggetService';
 import CreateNuggetModal from '../nuggets/CreateNuggetModal';
 
@@ -13,13 +13,6 @@ export default function BookDetailsPage() {
     const [nuggets, setNuggets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editing, setEditing] = useState(false);
-    const [saving, setSaving] = useState(false);
-
-    const [editData, setEditData] = useState({
-        current_page: 0,
-        status: 'toread'
-    });
 
     useEffect(() => {
         loadBookDetails();
@@ -34,28 +27,10 @@ export default function BookDetailsPage() {
             ]);
             setBook(bookData);
             setNuggets(nuggetsData);
-            setEditData({
-                current_page: bookData.current_page || 0,
-                status: bookData.status || 'toread'
-            });
         } catch (error) {
             console.error('Error loading book details:', error);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleSaveProgress = async () => {
-        try {
-            setSaving(true);
-            await updateBook(bookId, editData);
-            setBook({ ...book, ...editData });
-            setEditing(false);
-        } catch (error) {
-            console.error('Error updating book:', error);
-            alert('Failed to update book progress');
-        } finally {
-            setSaving(false);
         }
     };
 
@@ -68,20 +43,6 @@ export default function BookDetailsPage() {
         } catch (error) {
             console.error('Error deleting book:', error);
             alert('Failed to delete book');
-        }
-    };
-
-    const getProgress = () => {
-        if (!book?.total_pages || book.total_pages === 0) return 0;
-        return Math.round((editData.current_page / book.total_pages) * 100);
-    };
-
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'reading': return 'bg-blue-500';
-            case 'finished': return 'bg-green-500';
-            case 'toread': return 'bg-slate-400';
-            default: return 'bg-slate-400';
         }
     };
 
@@ -115,44 +76,80 @@ export default function BookDetailsPage() {
                 <span className="font-medium">Back to Library</span>
             </button>
 
-            {/* Hero Section */}
+            {/* Book Info Card */}
             <div className="card mb-8">
                 <div className="flex gap-6">
                     {/* Cover */}
-                    <div className="w-32 h-48 bg-slate-200 rounded-lg shadow-md overflow-hidden flex-shrink-0">
+                    <div className="w-40 h-60 bg-slate-200 rounded-lg shadow-lg overflow-hidden flex-shrink-0">
                         {book.cover_url ? (
                             <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
-                                <BookOpen className="text-slate-400" size={48} />
+                                <BookOpen className="text-slate-400" size={56} />
                             </div>
                         )}
                     </div>
 
                     {/* Info */}
                     <div className="flex-1">
-                        <h1 className="text-3xl font-bold text-slate-800 mb-2">{book.title}</h1>
-                        <p className="text-lg text-muted mb-4">{book.author || 'Unknown Author'}</p>
+                        <h1 className="text-3xl font-bold text-slate-800 mb-2 leading-tight">{book.title}</h1>
+                        <p className="text-xl text-muted mb-6">by {book.author || 'Unknown Author'}</p>
 
-                        <div className="flex gap-3 mb-4 text-sm text-slate-600">
-                            {book.total_pages && <span>{book.total_pages} pages</span>}
-                            <span className={`px-3 py-1 rounded-full text-white text-xs font-medium ${getStatusColor(book.status)}`}>
-                                {book.status === 'toread' ? 'To Read' : book.status.charAt(0).toUpperCase() + book.status.slice(1)}
-                            </span>
+                        {/* Metadata Grid */}
+                        <div className="grid grid-cols-2 gap-3 mb-6 text-sm">
+                            {book.publisher && (
+                                <div className="flex items-start gap-2">
+                                    <BookMarked size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-xs text-slate-500 uppercase tracking-wide">Publisher</p>
+                                        <p className="text-slate-700 font-medium">{book.publisher}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {book.published_date && (
+                                <div className="flex items-start gap-2">
+                                    <Calendar size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-xs text-slate-500 uppercase tracking-wide">Published</p>
+                                        <p className="text-slate-700 font-medium">{book.published_date.split('-')[0]}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {book.total_pages && (
+                                <div className="flex items-start gap-2">
+                                    <BookOpen size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-xs text-slate-500 uppercase tracking-wide">Pages</p>
+                                        <p className="text-slate-700 font-medium">{book.total_pages} pages</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {book.isbn && (
+                                <div className="flex items-start gap-2">
+                                    <Hash size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-xs text-slate-500 uppercase tracking-wide">ISBN</p>
+                                        <p className="text-slate-700 font-medium font-mono text-xs">{book.isbn}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Action Buttons */}
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-sm hover:shadow-md"
                             >
                                 <Plus size={18} />
                                 Add Nugget
                             </button>
                             <button
                                 onClick={handleDeleteBook}
-                                className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                className="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-rose-200 hover:border-rose-300"
                             >
                                 <Trash2 size={18} />
                             </button>
@@ -161,150 +158,73 @@ export default function BookDetailsPage() {
                 </div>
             </div>
 
-            {/* Progress Section */}
-            <div className="card mb-8">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-slate-800">Reading Progress</h2>
-                    {!editing ? (
-                        <button
-                            onClick={() => setEditing(true)}
-                            className="flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium"
-                        >
-                            <Edit size={16} />
-                            Edit
-                        </button>
-                    ) : (
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => {
-                                    setEditing(false);
-                                    setEditData({
-                                        current_page: book.current_page || 0,
-                                        status: book.status || 'toread'
-                                    });
-                                }}
-                                className="px-3 py-1 text-slate-600 hover:bg-slate-100 rounded-lg text-sm"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSaveProgress}
-                                disabled={saving}
-                                className="flex items-center gap-2 px-3 py-1 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
-                            >
-                                {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
-                                Save
-                            </button>
-                        </div>
-                    )}
+            {/* Nugget Count Badge */}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-slate-800">
+                    Captured Wisdom
+                </h2>
+                <div className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold">
+                    {nuggets.length} {nuggets.length === 1 ? 'Nugget' : 'Nuggets'}
                 </div>
-
-                {/* Progress Bar */}
-                <div className="mb-4">
-                    <div className="flex justify-between text-sm text-slate-600 mb-2">
-                        <span>{getProgress()}% complete</span>
-                        <span>{editData.current_page} / {book.total_pages || 0} pages</span>
-                    </div>
-                    <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                            className={`h-full rounded-full transition-all ${book.status === 'finished' ? 'bg-green-500' : 'bg-primary'
-                                }`}
-                            style={{ width: `${getProgress()}%` }}
-                        />
-                    </div>
-                </div>
-
-                {/* Edit Controls */}
-                {editing && (
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Current Page</label>
-                            <input
-                                type="number"
-                                value={editData.current_page}
-                                onChange={(e) => setEditData({ ...editData, current_page: parseInt(e.target.value) || 0 })}
-                                min="0"
-                                max={book.total_pages || 0}
-                                className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                            <select
-                                value={editData.status}
-                                onChange={(e) => setEditData({ ...editData, status: e.target.value })}
-                                className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                            >
-                                <option value="toread">To Read</option>
-                                <option value="reading">Reading</option>
-                                <option value="finished">Finished</option>
-                            </select>
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Nuggets Section */}
-            <div>
-                <h2 className="text-xl font-bold text-slate-800 mb-4">
-                    Your Nuggets ({nuggets.length})
-                </h2>
+            {nuggets.length === 0 ? (
+                <div className="card text-center py-16">
+                    <Sparkles className="mx-auto mb-4 text-slate-300" size={56} />
+                    <h3 className="text-xl font-semibold text-slate-600 mb-2">No nuggets yet</h3>
+                    <p className="text-slate-400 mb-8 max-w-md mx-auto">
+                        Start capturing inspiring quotes and insights from this book
+                    </p>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="btn-primary inline-flex items-center gap-2"
+                    >
+                        <Plus size={20} />
+                        Capture First Nugget
+                    </button>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 gap-4">
+                    {nuggets.map((nugget) => (
+                        <div key={nugget.id} className="card hover:border-primary/30 hover:shadow-md transition-all">
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <p className="text-slate-800 font-serif text-lg mb-3 leading-relaxed">
+                                        "{nugget.content}"
+                                    </p>
 
-                {nuggets.length === 0 ? (
-                    <div className="card text-center py-12">
-                        <Sparkles className="mx-auto mb-4 text-slate-300" size={48} />
-                        <h3 className="text-lg font-semibold text-slate-600 mb-2">No nuggets yet</h3>
-                        <p className="text-slate-400 text-sm mb-6">
-                            Start capturing wisdom from this book
-                        </p>
-                        <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="btn-primary inline-flex items-center gap-2"
-                        >
-                            <Plus size={18} />
-                            Add First Nugget
-                        </button>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-4">
-                        {nuggets.map((nugget) => (
-                            <div key={nugget.id} className="card hover:border-primary/30 transition-colors">
-                                <div className="flex gap-4">
-                                    <div className="flex-1">
-                                        <p className="text-slate-800 font-serif text-lg mb-3 leading-relaxed">
-                                            "{nugget.content}"
+                                    {nugget.note && (
+                                        <p className="text-sm text-slate-600 italic mb-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                            💭 {nugget.note}
                                         </p>
+                                    )}
 
-                                        {nugget.note && (
-                                            <p className="text-sm text-slate-600 italic mb-3 p-3 bg-slate-50 rounded-lg">
-                                                {nugget.note}
-                                            </p>
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        {nugget.page_number && (
+                                            <span className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded-md font-medium">
+                                                Page {nugget.page_number}
+                                            </span>
                                         )}
-
-                                        <div className="flex items-center gap-3">
-                                            {nugget.page_number && (
-                                                <span className="text-xs text-slate-500">Page {nugget.page_number}</span>
-                                            )}
-                                            {nugget.tags && nugget.tags.map(tag => (
-                                                <span key={tag} className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded-full">
-                                                    #{tag}
-                                                </span>
-                                            ))}
-                                        </div>
+                                        {nugget.tags && nugget.tags.map(tag => (
+                                            <span key={tag} className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-md font-medium">
+                                                #{tag}
+                                            </span>
+                                        ))}
                                     </div>
-
-                                    <button className={`p-2 h-fit rounded-full transition-colors ${nugget.is_favorite
-                                            ? 'text-rose-500 bg-rose-50'
-                                            : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'
-                                        }`}>
-                                        <Heart size={18} fill={nugget.is_favorite ? "currentColor" : "none"} />
-                                    </button>
                                 </div>
+
+                                <button className={`p-2 h-fit rounded-full transition-colors ${nugget.is_favorite
+                                        ? 'text-rose-500 bg-rose-50'
+                                        : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'
+                                    }`}>
+                                    <Heart size={20} fill={nugget.is_favorite ? "currentColor" : "none"} />
+                                </button>
                             </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             <CreateNuggetModal
                 isOpen={isModalOpen}
