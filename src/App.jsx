@@ -6,6 +6,7 @@ import LibraryPage from './features/books/LibraryPage';
 import AddBookPage from './features/books/AddBookPage';
 import ProfilePage from './features/auth/ProfilePage';
 import AuthPage from './features/auth/AuthPage';
+import BookDetailsPage from './features/books/BookDetailsPage';
 
 function ProtectedRoute({ children }) {
   const { user, session } = useAuth();
@@ -30,6 +31,7 @@ function App() {
       }>
         <Route index element={<FocusPage />} />
         <Route path="library" element={<LibraryPage />} />
+        <Route path="library/:bookId" element={<BookDetailsPage />} />
         <Route path="add" element={<AddBookPage />} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Filter, BookOpen, CheckCircle, Clock, Loader2 } from 'lucide-react';
 import { getBooks, searchBooks } from '../../services/bookService';
 
 export default function LibraryPage() {
+    const navigate = useNavigate();
     const [filter, setFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [books, setBooks] = useState([]);
@@ -91,8 +93,8 @@ export default function LibraryPage() {
                         key={tab}
                         onClick={() => setFilter(tab)}
                         className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${filter === tab
-                                ? 'bg-slate-800 text-white shadow-md'
-                                : 'bg-white text-slate-600 border border-slate-200'
+                            ? 'bg-slate-800 text-white shadow-md'
+                            : 'bg-white text-slate-600 border border-slate-200'
                             }`}
                     >
                         {tab === 'toread' ? 'To Read' : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -146,7 +148,10 @@ export default function LibraryPage() {
                                         </div>
                                     )}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                                        <button className="w-full py-2 bg-white/90 backdrop-blur-sm rounded-lg text-xs font-bold text-slate-900 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                        <button
+                                            onClick={() => navigate(`/library/${book.id}`)}
+                                            className="w-full py-2 bg-white/90 backdrop-blur-sm rounded-lg text-xs font-bold text-slate-900 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
+                                        >
                                             View Details
                                         </button>
                                     </div>
