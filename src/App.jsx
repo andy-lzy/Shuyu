@@ -7,6 +7,7 @@ import AddBookPage from './features/books/AddBookPage';
 import ProfilePage from './features/auth/ProfilePage';
 import AuthPage from './features/auth/AuthPage';
 import BookDetailsPage from './features/books/BookDetailsPage';
+import SharedNuggetPage from './features/nuggets/SharedNuggetPage';
 
 function ProtectedRoute({ children }) {
   const { user, session } = useAuth();
@@ -23,6 +24,7 @@ function App() {
   return (
     <Routes>
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/share/:shareId" element={<SharedNuggetPage />} />
 
       <Route path="/" element={
         <ProtectedRoute>

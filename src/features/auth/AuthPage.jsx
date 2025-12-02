@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 
@@ -13,6 +13,7 @@ export default function AuthPage() {
 
     const { signIn, signUp } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -35,7 +36,10 @@ export default function AuthPage() {
                 });
                 if (error) throw error;
             }
-            navigate('/');
+
+            // Check for return URL
+            const returnUrl = location.state?.returnUrl || '/';
+            navigate(returnUrl);
         } catch (err) {
             setError(err.message);
         } finally {

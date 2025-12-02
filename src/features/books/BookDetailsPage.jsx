@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Heart, Plus, Trash2, Loader2, Sparkles, Calendar, Hash, BookMarked } from 'lucide-react';
+import { ArrowLeft, BookOpen, Heart, Plus, Trash2, Loader2, Sparkles, Calendar, Hash, BookMarked, Share2 } from 'lucide-react';
 import { getBookById, deleteBook } from '../../services/bookService';
 import { getNuggetsByBook } from '../../services/nuggetService';
 import CreateNuggetModal from '../nuggets/CreateNuggetModal';
+import ShareNuggetModal from '../nuggets/ShareNuggetModal';
 
 export default function BookDetailsPage() {
     const { bookId } = useParams();
@@ -13,6 +14,8 @@ export default function BookDetailsPage() {
     const [nuggets, setNuggets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [shareModalOpen, setShareModalOpen] = useState(false);
+    const [nuggetToShare, setNuggetToShare] = useState(null);
 
     useEffect(() => {
         loadBookDetails();
@@ -214,12 +217,23 @@ export default function BookDetailsPage() {
                                     </div>
                                 </div>
 
-                                <button className={`p-2 h-fit rounded-full transition-colors ${nugget.is_favorite
+                                <div className="flex flex-col gap-2">
+                                    <button className={`p-2 h-fit rounded-full transition-colors ${nugget.is_favorite
                                         ? 'text-rose-500 bg-rose-50'
                                         : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'
-                                    }`}>
-                                    <Heart size={20} fill={nugget.is_favorite ? "currentColor" : "none"} />
-                                </button>
+                                        }`}>
+                                        <Heart size={20} fill={nugget.is_favorite ? "currentColor" : "none"} />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setNuggetToShare(nugget);
+                                            setShareModalOpen(true);
+                                        }}
+                                        className="p-2 h-fit rounded-full text-slate-400 hover:text-primary hover:bg-sky-50 transition-colors"
+                                    >
+                                        <Share2 size={20} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -230,6 +244,15 @@ export default function BookDetailsPage() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onNuggetCreated={loadBookDetails}
+            />
+
+            <ShareNuggetModal
+                isOpen={shareModalOpen}
+                onClose={() => {
+                    setShareModalOpen(false);
+                    setNuggetToShare(null);
+                }}
+                nugget={nuggetToShare}
             />
         </div>
     );

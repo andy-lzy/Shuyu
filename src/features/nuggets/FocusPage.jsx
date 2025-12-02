@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { Share2, Heart, Quote, Book, Plus, Loader2, Sparkles } from 'lucide-react';
 import { getNuggets, toggleFavorite } from '../../services/nuggetService';
 import CreateNuggetModal from './CreateNuggetModal';
+import ShareNuggetModal from './ShareNuggetModal';
 
 export default function FocusPage() {
     const [nuggets, setNuggets] = useState([]);
     const [activeNugget, setActiveNugget] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [shareModalOpen, setShareModalOpen] = useState(false);
+    const [nuggetToShare, setNuggetToShare] = useState(null);
 
     useEffect(() => {
         loadNuggets();
@@ -143,13 +146,19 @@ export default function FocusPage() {
                                             <button
                                                 onClick={() => handleFavorite(nugget)}
                                                 className={`p-2 transition-colors rounded-full ${nugget.is_favorite
-                                                        ? 'text-rose-500 bg-rose-50'
-                                                        : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'
+                                                    ? 'text-rose-500 bg-rose-50'
+                                                    : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'
                                                     }`}
                                             >
                                                 <Heart size={20} fill={nugget.is_favorite ? "currentColor" : "none"} />
                                             </button>
-                                            <button className="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-sky-50 rounded-full">
+                                            <button
+                                                onClick={() => {
+                                                    setNuggetToShare(nugget);
+                                                    setShareModalOpen(true);
+                                                }}
+                                                className="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-sky-50 rounded-full"
+                                            >
                                                 <Share2 size={20} />
                                             </button>
                                         </div>
@@ -176,6 +185,15 @@ export default function FocusPage() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onNuggetCreated={loadNuggets}
+            />
+
+            <ShareNuggetModal
+                isOpen={shareModalOpen}
+                onClose={() => {
+                    setShareModalOpen(false);
+                    setNuggetToShare(null);
+                }}
+                nugget={nuggetToShare}
             />
         </div>
     );
