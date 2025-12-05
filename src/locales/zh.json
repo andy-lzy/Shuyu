@@ -1,0 +1,118 @@
+{
+    "common": {
+        "loading": "加载中...",
+        "error": "错误",
+        "save": "保存",
+        "cancel": "取消",
+        "delete": "删除",
+        "edit": "编辑",
+        "back": "返回"
+    },
+    "auth": {
+        "welcome": "欢迎回来",
+        "subtitle": "您的个人智慧书房",
+        "email": "邮箱",
+        "password": "密码",
+        "signIn": "登录",
+        "signUp": "创建账号",
+        "noAccount": "还没有账号？",
+        "hasAccount": "已有账号？",
+        "loggingIn": "登录中...",
+        "signingUp": "注册中..."
+    },
+    "library": {
+        "title": "我的书房",
+        "subtitle": "您的智慧收藏",
+        "empty": "书房空空如也",
+        "addFirst": "添加第一本书",
+        "search": "搜索书籍...",
+        "tabs": {
+            "all": "全部",
+            "toread": "想读",
+            "reading": "在读",
+            "finished": "已读"
+        }
+    },
+    "nav": {
+        "focus": "专注",
+        "library": "书房",
+        "add": "添加书籍",
+        "profile": "我的"
+    },
+    "profile": {
+        "title": "个人中心",
+        "signOut": "退出登录",
+        "language": "语言",
+        "english": "英文",
+        "chinese": "中文"
+    },
+    "addBook": {
+        "title": "添加书籍",
+        "subtitle": "构建您的智慧书房",
+        "searchTab": "搜索",
+        "manualTab": "手动录入",
+        "searchPlaceholder": "搜索书名、作者或 ISBN...",
+        "searching": "搜索中...",
+        "noResults": "未找到相关书籍",
+        "tryAgain": "请尝试其他关键词",
+        "startTyping": "输入关键词开始搜索",
+        "foundResults": "找到 {{count}} 本书",
+        "form": {
+            "title": "书名",
+            "author": "作者",
+            "publisher": "出版社",
+            "publishedDate": "出版日期",
+            "isbn": "ISBN",
+            "totalPages": "总页数",
+            "status": "阅读状态",
+            "coverUrl": "封面链接"
+        },
+        "buttons": {
+            "addToLibrary": "添加到书房",
+            "adding": "添加中...",
+            "select": "选择"
+        },
+        "success": "添加成功！正在跳转..."
+    },
+    "bookDetails": {
+        "pages": "{{count}} 页",
+        "publisher": "出版社",
+        "published": "出版年份",
+        "isbn": "ISBN",
+        "status": "状态",
+        "delete": "删除书籍",
+        "confirmDelete": "确定要删除这本书吗？",
+        "nuggets": "书摘",
+        "addNugget": "添加书摘",
+        "noNuggets": "暂无书摘，快来添加第一条吧！",
+        "nuggetPlaceholder": "写下你的感悟...",
+        "page": "页码",
+        "note": "笔记 (可选)",
+        "tags": "标签 (用逗号分隔)",
+        "saveNugget": "保存书摘"
+    },
+    "focus": {
+        "title": "专注",
+        "subtitle": "每日智慧",
+        "empty": "暂无书摘，开始阅读吧！",
+        "share": "分享",
+        "favorite": "收藏"
+    },
+    "share": {
+        "title": "分享书摘",
+        "copyLink": "复制链接",
+        "copied": "已复制！",
+        "shareVia": "分享至",
+        "twitter": "Twitter",
+        "whatsapp": "WhatsApp",
+        "email": "邮件"
+    },
+    "sharedPage": {
+        "saveToLibrary": "保存到我的书房",
+        "saving": "保存中...",
+        "loginToSave": "登录并保存",
+        "saved": "已保存！",
+        "appTitle": "书语",
+        "appSubtitle": "分享书籍智慧"
+    }
+}

@@ -1,47 +1,42 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { BookOpen, Loader2, Download, CheckCircle, AlertCircle, LogIn } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getSharedNugget, saveSharedNugget } from '../../services/shareService';
-import { supabase } from '../../lib/supabase';
+import { Quote, BookOpen, Download, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function SharedNuggetPage() {
     const { shareId } = useParams();
+    const { user } = useAuth();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
-    const [user, setUser] = useState(null);
 
     useEffect(() => {
-        checkUser();
         loadSharedNugget();
     }, [shareId]);
 
-    const checkUser = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-    };
-
-    const loadSharedNugget = async () => {
+    async function loadSharedNugget() {
         try {
             setLoading(true);
-            const sharedData = await getSharedNugget(shareId);
-            setData(sharedData);
+            const result = await getSharedNugget(shareId);
+            setData(result);
         } catch (err) {
-            console.error('Error loading shared nugget:', err);
-            setError('This shared nugget could not be found. It may have been deleted.');
+            setError(err.message);
         } finally {
             setLoading(false);
         }
-    };
+    }
 
     const handleSave = async () => {
         if (!user) {
             // Redirect to login with return URL
-            navigate('/auth?mode=signup', { state: { returnUrl: `/share/${shareId}` } });
+            navigate('/auth', { state: { returnUrl: `/share/${shareId}` } });
             return;
         }
 
@@ -49,17 +44,11 @@ export default function SharedNuggetPage() {
             setSaving(true);
             await saveSharedNugget(shareId);
             setSaved(true);
-            // Optional: navigate to library after delay
             setTimeout(() => {
-                navigate(`/library`);
+                navigate('/library');
             }, 2000);
         } catch (err) {
-            console.error('Error saving nugget:', err);
-            if (err.message.includes('already have')) {
-                setSaved(true); // Treat as success but maybe show different message
-            } else {
-                alert('Failed to save nugget: ' + err.message);
-            }
+            alert(t('common.error') + ': ' + err.message);
         } finally {
             setSaving(false);
         }
@@ -68,123 +57,108 @@ export default function SharedNuggetPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <Loader2 className="animate-spin text-primary" size={32} />
+                <Loader2 className="animate-spin text-slate-400" size={32} />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-slate-50">
-                <AlertCircle className="text-rose-400 mb-4" size={48} />
-                <h2 className="text-xl font-bold text-slate-800 mb-2 text-center">Nugget Not Found</h2>
-                <p className="text-slate-600 text-center mb-6 max-w-md">{error}</p>
-                <Link to="/" className="btn-primary">
-                    Go Home
-                </Link>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6 text-center">
+                <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mb-4">
+                    <AlertCircle size={32} />
+                </div>
+                <h1 className="text-xl font-bold text-slate-800 mb-2">{t('common.error')}</h1>
+                <p className="text-slate-500 mb-6">{error}</p>
+                <Link to="/" className="text-primary font-bold hover:underline">{t('common.back')}</Link>
             </div>
         );
     }
 
+    if (!data) return null;
+
     const { nugget, book } = data;
 
     return (
-        <div className="min-h-screen bg-slate-50 py-12 px-4 flex flex-col items-center">
-            {/* Logo / Brand */}
-            <div className="mb-8 font-serif text-2xl font-bold text-primary flex items-center gap-2">
-                <BookOpen size={28} />
-                Shuyu
-            </div>
+        <div className="min-h-screen bg-slate-50 flex flex-col">
+            {/* Header */}
+            <header className="bg-white border-b border-slate-100 py-4 px-6 flex justify-between items-center sticky top-0 z-10">
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white font-serif font-bold">
+                        S
+                    </div>
+                    <span className="font-bold text-slate-800">{t('sharedPage.appTitle')}</span>
+                </div>
+                {!user && (
+                    <Link to="/auth" className="text-sm font-bold text-slate-600 hover:text-slate-900">
+                        {t('auth.signIn')}
+                    </Link>
+                )}
+            </header>
 
-            <div className="w-full max-w-2xl">
-                {/* Nugget Card */}
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 animate-slide-up">
-                    <div className="p-8 md:p-12">
-                        <div className="mb-8">
-                            <span className="text-6xl text-primary/20 font-serif leading-none">"</span>
-                            <p className="text-xl md:text-2xl text-slate-800 font-serif leading-relaxed -mt-6 relative z-10">
-                                {nugget.content}
-                            </p>
-                        </div>
+            {/* Main Content */}
+            <main className="flex-1 flex flex-col items-center justify-center p-6">
+                <div className="w-full max-w-md">
+                    {/* Nugget Card */}
+                    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 overflow-hidden mb-8 animate-slide-up">
+                        <div className="p-8 md:p-10 relative">
+                            <Quote className="text-primary/10 absolute top-6 left-6" size={64} />
+                            <div className="relative z-10">
+                                <p className="font-serif text-2xl text-slate-800 leading-relaxed mb-8">
+                                    "{nugget.content}"
+                                </p>
 
-                        {nugget.note && (
-                            <div className="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-100 text-slate-600 italic">
-                                💭 {nugget.note}
-                            </div>
-                        )}
-
-                        <div className="flex flex-wrap gap-2 mb-8">
-                            {nugget.tags && nugget.tags.map(tag => (
-                                <span key={tag} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                                    #{tag}
-                                </span>
-                            ))}
-                            {nugget.page_number && (
-                                <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-sm font-medium">
-                                    Page {nugget.page_number}
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Book Info */}
-                        <div className="flex items-center gap-4 pt-8 border-t border-slate-100">
-                            <div className="w-16 h-24 bg-slate-200 rounded shadow-sm overflow-hidden flex-shrink-0">
-                                {book.cover_url ? (
-                                    <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-slate-300">
-                                        <BookOpen className="text-slate-400" size={24} />
+                                <div className="flex items-center gap-4 pt-8 border-t border-slate-50">
+                                    <div className="w-12 h-16 bg-slate-200 rounded shadow-sm overflow-hidden flex-shrink-0">
+                                        {book.cover_url ? (
+                                            <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300">
+                                                <BookOpen size={20} />
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-slate-900 leading-tight mb-1">{book.title}</h3>
-                                <p className="text-slate-600 text-sm mb-1">by {book.author}</p>
-                                <div className="text-xs text-slate-400 flex gap-2">
-                                    {book.published_date && <span>{book.published_date.split('-')[0]}</span>}
-                                    {book.publisher && <span>• {book.publisher}</span>}
+                                    <div className="min-w-0">
+                                        <h3 className="font-bold text-slate-800 truncate">{book.title}</h3>
+                                        <p className="text-sm text-slate-500 truncate">{book.author}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Action Section */}
-                <div className="text-center animate-fade-in delay-200">
-                    {saved ? (
-                        <div className="bg-green-50 border border-green-200 rounded-xl p-6 inline-block w-full max-w-md">
-                            <div className="flex flex-col items-center gap-2 text-green-700">
-                                <CheckCircle size={32} />
-                                <h3 className="font-bold text-lg">Saved to Library!</h3>
-                                <p className="text-sm opacity-90">Redirecting you to your library...</p>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center gap-4">
-                            <button
-                                onClick={handleSave}
-                                disabled={saving}
-                                className="w-full max-w-md py-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-lg"
-                            >
-                                {saving ? (
-                                    <Loader2 className="animate-spin" size={24} />
-                                ) : user ? (
-                                    <Download size={24} />
-                                ) : (
-                                    <LogIn size={24} />
-                                )}
-                                {user ? 'Save to My Library' : 'Login to Save'}
-                            </button>
+                    {/* Action Button */}
+                    <button
+                        onClick={handleSave}
+                        disabled={saving || saved}
+                        className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all flex items-center justify-center gap-2 ${saved
+                                ? 'bg-green-500 text-white shadow-green-500/20'
+                                : 'bg-slate-900 text-white shadow-slate-900/20 hover:scale-[1.02] active:scale-[0.98]'
+                            }`}
+                    >
+                        {saving ? (
+                            <>
+                                <Loader2 className="animate-spin" />
+                                {t('sharedPage.saving')}
+                            </>
+                        ) : saved ? (
+                            <>
+                                <CheckCircle2 />
+                                {t('sharedPage.saved')}
+                            </>
+                        ) : (
+                            <>
+                                <Download size={20} />
+                                {user ? t('sharedPage.saveToLibrary') : t('sharedPage.loginToSave')}
+                            </>
+                        )}
+                    </button>
 
-                            {!user && (
-                                <p className="text-slate-500 text-sm">
-                                    New to Shuyu? <Link to="/auth?mode=signup" className="text-primary font-medium hover:underline">Create an account</Link> to start collecting wisdom.
-                                </p>
-                            )}
-                        </div>
-                    )}
+                    <p className="text-center text-slate-400 text-sm mt-6">
+                        {t('sharedPage.appSubtitle')}
+                    </p>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

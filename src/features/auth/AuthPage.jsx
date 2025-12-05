@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 
@@ -14,6 +15,7 @@ export default function AuthPage() {
     const { signIn, signUp } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const { t } = useTranslation();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -48,101 +50,97 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
-            {/* Background Elements */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-sky-400/20 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-rose-400/20 rounded-full blur-[100px]" />
-            </div>
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
+            <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden animate-fade-in">
+                <div className="p-8 md:p-10">
+                    <div className="text-center mb-10">
+                        <h1 className="font-serif text-4xl font-bold text-slate-800 mb-3">Shuyu</h1>
+                        <p className="text-slate-500 font-medium">{t('auth.subtitle')}</p>
+                    </div>
 
-            <div className="w-full max-w-md">
-                <div className="text-center mb-10">
-                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-rose-500 mb-2">
-                        Shuyu
-                    </h1>
-                    <p className="text-slate-500 font-serif italic">"Where wisdom lives"</p>
-                </div>
+                    <div className="flex bg-slate-100 p-1 rounded-xl mb-8">
+                        <button
+                            className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all ${isLogin ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            onClick={() => setIsLogin(true)}
+                        >
+                            {t('auth.signIn')}
+                        </button>
+                        <button
+                            className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all ${!isLogin ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            onClick={() => setIsLogin(false)}
+                        >
+                            {t('auth.signUp')}
+                        </button>
+                    </div>
 
-                <div className="glass-panel p-8 rounded-3xl shadow-xl backdrop-blur-xl border border-white/40">
-                    <h2 className="text-2xl font-bold text-slate-800 mb-6">
-                        {isLogin ? 'Welcome Back' : 'Create Account'}
-                    </h2>
-
-                    {error && (
-                        <div className="bg-rose-50 text-rose-600 p-3 rounded-xl text-sm mb-6 border border-rose-100">
-                            {error}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-5">
                         {!isLogin && (
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full p-3 bg-white/50 border border-white rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="Choose a username"
-                                />
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700 ml-1">Username</label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-transparent outline-none transition-all font-medium"
+                                        placeholder="Choose a username"
+                                        required
+                                    />
+                                </div>
                             </div>
                         )}
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 ml-1">{t('auth.email')}</label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                                 <input
                                     type="email"
-                                    required
-                                    className="w-full pl-10 p-3 bg-white/50 border border-white rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="hello@example.com"
+                                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-transparent outline-none transition-all font-medium"
+                                    placeholder="name@example.com"
+                                    required
                                 />
                             </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 ml-1">{t('auth.password')}</label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                                 <input
                                     type="password"
-                                    required
-                                    className="w-full pl-10 p-3 bg-white/50 border border-white rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-transparent outline-none transition-all font-medium"
                                     placeholder="••••••••"
+                                    required
                                 />
                             </div>
                         </div>
+
+                        {error && (
+                            <div className="p-4 bg-rose-50 text-rose-600 text-sm rounded-xl font-medium border border-rose-100 animate-shake">
+                                {error}
+                            </div>
+                        )}
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full btn-primary flex items-center justify-center gap-2 mt-6 group"
+                            className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {loading ? (
-                                <Loader2 className="animate-spin" size={20} />
+                                <Loader2 className="animate-spin" />
                             ) : (
                                 <>
-                                    {isLogin ? 'Sign In' : 'Sign Up'}
-                                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                    {isLogin ? t('auth.signIn') : t('auth.signUp')}
+                                    <ArrowRight size={20} />
                                 </>
                             )}
                         </button>
                     </form>
-
-                    <div className="mt-6 text-center">
-                        <button
-                            onClick={() => setIsLogin(!isLogin)}
-                            className="text-sm text-slate-500 hover:text-primary transition-colors"
-                        >
-                            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Share2, Copy, Check, Loader2, Twitter, MessageCircle, Mail } from 'lucide-react';
 import { createShareLink } from '../../services/shareService';
 
@@ -7,6 +8,7 @@ export default function ShareNuggetModal({ isOpen, onClose, nugget }) {
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
     const [error, setError] = useState(null);
+    const { t } = useTranslation();
 
     const handleCreateLink = async () => {
         try {
@@ -40,40 +42,16 @@ export default function ShareNuggetModal({ isOpen, onClose, nugget }) {
         onClose();
     };
 
-    const shareToSocial = (platform) => {
-        if (!shareLink) return;
-        const text = encodeURIComponent(`Check out this wisdom from "${nugget.content.substring(0, 50)}..."`);
-        const url = encodeURIComponent(shareLink);
-
-        let link = '';
-        switch (platform) {
-            case 'twitter':
-                link = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-                break;
-            case 'whatsapp':
-                link = `https://wa.me/?text=${text}%20${url}`;
-                break;
-            case 'email':
-                link = `mailto:?subject=Wisdom Shared via Shuyu&body=${text}%0A%0A${url}`;
-                break;
-        }
-        window.open(link, '_blank');
-    };
-
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-slide-up ring-1 ring-slate-900/5">
-                {/* Header with Gradient */}
-                <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 flex justify-between items-center">
-                    <div>
-                        <h3 className="font-bold text-xl text-slate-800 flex items-center gap-2">
-                            <Share2 size={22} className="text-primary" />
-                            Share Wisdom
-                        </h3>
-                        <p className="text-xs text-slate-500 mt-1">Inspire others with this nugget</p>
-                    </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden animate-slide-up">
+                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
+                        <Share2 size={20} className="text-primary" />
+                        {t('share.title')}
+                    </h3>
                     <button
                         onClick={handleClose}
                         className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
@@ -82,102 +60,78 @@ export default function ShareNuggetModal({ isOpen, onClose, nugget }) {
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className="p-6">
-                    {/* Nugget Preview */}
-                    <div className="mb-8 p-5 bg-slate-50 rounded-xl border border-slate-100 relative group">
-                        <div className="absolute top-3 left-3 text-primary/20">
-                            <Share2 size={40} />
-                        </div>
-                        <p className="text-sm font-serif text-slate-700 italic leading-relaxed relative z-10 pl-2">
-                            "{nugget.content.substring(0, 120)}{nugget.content.length > 120 ? '...' : ''}"
+                    <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <p className="text-sm font-serif text-slate-700 italic leading-relaxed">
+                            "{nugget.content.substring(0, 100)}{nugget.content.length > 100 ? '...' : ''}"
                         </p>
                     </div>
-
-                    {error && (
-                        <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-sm text-rose-600 flex items-center gap-2">
-                            <span className="font-bold">Error:</span> {error}
-                        </div>
-                    )}
 
                     {!shareLink ? (
                         <button
                             onClick={handleCreateLink}
                             disabled={loading}
-                            className="w-full py-3.5 px-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all disabled:opacity-70"
                         >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="animate-spin" size={20} />
-                                    Generating Link...
-                                </>
-                            ) : (
-                                <>
-                                    <Share2 size={20} />
-                                    Create Share Link
-                                </>
-                            )}
+                            {loading ? <Loader2 className="animate-spin" size={20} /> : <Share2 size={20} />}
+                            {t('share.title')}
                         </button>
                     ) : (
-                        <div className="space-y-6 animate-fade-in">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                                    Share Link
-                                </label>
-                                <div className="flex gap-2">
-                                    <div className="flex-1 relative group">
-                                        <input
-                                            type="text"
-                                            value={shareLink}
-                                            readOnly
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono text-slate-600 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all pr-12"
-                                            onClick={(e) => e.target.select()}
-                                        />
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                                            <Share2 size={16} />
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={handleCopy}
-                                        className={`px-4 py-3 rounded-xl font-medium transition-all shadow-sm flex items-center gap-2 ${copied
-                                                ? 'bg-green-500 text-white shadow-green-500/25'
-                                                : 'bg-slate-800 text-white hover:bg-slate-700 shadow-slate-800/25'
-                                            }`}
-                                    >
-                                        {copied ? <Check size={20} /> : <Copy size={20} />}
-                                    </button>
-                                </div>
+                        <div className="space-y-4 animate-fade-in">
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={shareLink}
+                                    readOnly
+                                    className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none"
+                                />
+                                <button
+                                    onClick={handleCopy}
+                                    className={`p-3 rounded-xl flex items-center justify-center transition-all ${copied ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                                >
+                                    {copied ? <Check size={20} /> : <Copy size={20} />}
+                                </button>
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-                                    Share via
-                                </label>
-                                <div className="grid grid-cols-3 gap-3">
-                                    <button
-                                        onClick={() => shareToSocial('twitter')}
-                                        className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-sky-50 text-slate-600 hover:text-sky-500 transition-colors border border-slate-100 hover:border-sky-200"
+                            {copied && <p className="text-center text-xs text-green-600 font-bold">{t('share.copied')}</p>}
+
+                            <div className="pt-4 border-t border-slate-100">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 text-center">{t('share.shareVia')}</p>
+                                <div className="flex justify-center gap-4">
+                                    <a
+                                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(nugget.content)}&url=${encodeURIComponent(shareLink)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-3 bg-sky-50 text-sky-500 rounded-full hover:bg-sky-100 transition-colors"
+                                        title={t('share.twitter')}
                                     >
-                                        <Twitter size={24} />
-                                        <span className="text-xs font-medium">Twitter</span>
-                                    </button>
-                                    <button
-                                        onClick={() => shareToSocial('whatsapp')}
-                                        className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-green-50 text-slate-600 hover:text-green-500 transition-colors border border-slate-100 hover:border-green-200"
+                                        <Twitter size={20} />
+                                    </a>
+                                    <a
+                                        href={`https://wa.me/?text=${encodeURIComponent(nugget.content + ' ' + shareLink)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-3 bg-green-50 text-green-500 rounded-full hover:bg-green-100 transition-colors"
+                                        title={t('share.whatsapp')}
                                     >
-                                        <MessageCircle size={24} />
-                                        <span className="text-xs font-medium">WhatsApp</span>
-                                    </button>
-                                    <button
-                                        onClick={() => shareToSocial('email')}
-                                        className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-purple-50 text-slate-600 hover:text-purple-500 transition-colors border border-slate-100 hover:border-purple-200"
+                                        <MessageCircle size={20} />
+                                    </a>
+                                    <a
+                                        href={`mailto:?subject=Check out this nugget&body=${encodeURIComponent(nugget.content + '\n\n' + shareLink)}`}
+                                        className="p-3 bg-indigo-50 text-indigo-500 rounded-full hover:bg-indigo-100 transition-colors"
+                                        title={t('share.email')}
                                     >
-                                        <Mail size={24} />
-                                        <span className="text-xs font-medium">Email</span>
-                                    </button>
+                                        <Mail size={20} />
+                                    </a>
                                 </div>
                             </div>
                         </div>
+                    )}
+
+                    {error && (
+                        <p className="mt-4 text-center text-sm text-rose-600 bg-rose-50 p-2 rounded-lg border border-rose-100">
+                            {error}
+                        </p>
                     )}
                 </div>
             </div>

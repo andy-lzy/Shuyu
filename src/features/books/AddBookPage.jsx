@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Search, BookOpen, Plus, ScanLine, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import { createBook } from '../../services/bookService';
 import { searchGoogleBooks } from '../../services/googleBooksService';
 import { useDebounce } from '../../hooks/useDebounce';
 
 export default function AddBookPage() {
-  const [activeTab, setActiveTab] = useState('manual');
+  const [activeTab, setActiveTab] = useState('search'); // 'search' or 'manual'
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Debounce search query to avoid excessive API calls
   const debouncedSearchQuery = useDebounce(searchQuery, 600);
@@ -22,7 +25,11 @@ export default function AddBookPage() {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
+    publisher: '',
+    published_date: '',
+    isbn: '',
     total_pages: '',
+    cover_url: '',
     status: 'toread'
   });
 
@@ -41,7 +48,7 @@ export default function AddBookPage() {
         setSearchResults(results);
       } catch (error) {
         console.error('Search error:', error);
-        setSearchError('Failed to search books. Please try again.');
+        setSearchError(t('common.error'));
         setSearchResults([]);
       } finally {
         setSearching(false);
@@ -49,7 +56,7 @@ export default function AddBookPage() {
     };
 
     searchBooks();
-  }, [debouncedSearchQuery]);
+  }, [debouncedSearchQuery, t]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -63,7 +70,7 @@ export default function AddBookPage() {
     e.preventDefault();
 
     if (!formData.title.trim()) {
-      alert('Please enter a book title');
+      alert(t('addBook.form.title') + ' is required');
       return;
     }
 
@@ -74,10 +81,13 @@ export default function AddBookPage() {
       await createBook({
         title: formData.title,
         author: formData.author || null,
+        publisher: formData.publisher || null,
+        published_date: formData.published_date || null,
+        isbn: formData.isbn || null,
         total_pages: formData.total_pages ? parseInt(formData.total_pages) : null,
+        cover_url: formData.cover_url || null,
         current_page: 0,
-        status: formData.status,
-        cover_url: null
+        status: formData.status
       });
 
       setSuccess(true);
@@ -86,7 +96,11 @@ export default function AddBookPage() {
       setFormData({
         title: '',
         author: '',
+        publisher: '',
+        published_date: '',
+        isbn: '',
         total_pages: '',
+        cover_url: '',
         status: 'toread'
       });
 
@@ -97,52 +111,46 @@ export default function AddBookPage() {
 
     } catch (error) {
       console.error('Error adding book:', error);
-      alert('Failed to add book: ' + error.message);
+      alert(t('common.error') + ': ' + error.message);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleAddFromSearch = async (book) => {
-    try {
-      setSaving(true);
+  const handleSelectBook = (book) => {
+    // Populate form with selected book data
+    setFormData({
+      title: book.title,
+      author: book.author,
+      publisher: book.publisher || '',
+      published_date: book.publishedDate || '',
+      isbn: book.isbn || '',
+      total_pages: book.pageCount || '',
+      cover_url: book.coverUrl || '',
+      status: 'toread'
+    });
 
-      await createBook({
-        title: book.title,
-        author: book.author,
-        cover_url: book.coverUrl,
-        total_pages: book.pageCount,
-        status: 'toread',
-        current_page: 0
-      });
-
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/library');
-      }, 1500);
-
-    } catch (error) {
-      console.error('Error adding book:', error);
-      alert('Failed to add book: ' + error.message);
-    } finally {
-      setSaving(false);
-    }
+    // Switch to manual tab for editing
+    setActiveTab('manual');
+    // Clear search to avoid confusion when switching back
+    setSearchQuery('');
+    setSearchResults([]);
   };
 
   return (
     <div className="pb-24 pt-8 px-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">
-          Add Book
+          {t('addBook.title')}
         </h1>
-        <p className="text-muted mt-1">Build your library of wisdom</p>
+        <p className="text-muted mt-1">{t('addBook.subtitle')}</p>
       </header>
 
       {/* Success Message */}
       {success && (
         <div className="mb-6 bg-green-50 text-green-700 p-4 rounded-xl flex items-center gap-3 border border-green-100 animate-fade-in">
           <CheckCircle2 size={20} />
-          <span className="font-medium">Book added successfully! Redirecting...</span>
+          <span className="font-medium">{t('addBook.success')}</span>
         </div>
       )}
 
@@ -156,7 +164,7 @@ export default function AddBookPage() {
             }`}
         >
           <Search size={18} className="mr-2" />
-          Search
+          {t('addBook.searchTab')}
         </button>
         <button
           onClick={() => setActiveTab('manual')}
@@ -166,7 +174,7 @@ export default function AddBookPage() {
             }`}
         >
           <BookOpen size={18} className="mr-2" />
-          Manual
+          {t('addBook.manualTab')}
         </button>
       </div>
 
@@ -180,7 +188,7 @@ export default function AddBookPage() {
             <input
               type="text"
               className="block w-full pl-11 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
-              placeholder="Search by title, author, or ISBN..."
+              placeholder={t('addBook.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -197,7 +205,7 @@ export default function AddBookPage() {
             {searching && (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="animate-spin text-primary mr-2" size={24} />
-                <span className="text-muted">Searching books...</span>
+                <span className="text-muted">{t('addBook.searching')}</span>
               </div>
             )}
 
@@ -211,7 +219,7 @@ export default function AddBookPage() {
             {/* Results count */}
             {!searching && searchResults.length > 0 && (
               <p className="text-sm font-medium text-muted mb-4">
-                Found {searchResults.length} results
+                {t('addBook.foundResults', { count: searchResults.length })}
               </p>
             )}
 
@@ -231,24 +239,23 @@ export default function AddBookPage() {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-slate-800 truncate">{book.title}</h3>
                     <p className="text-sm text-muted truncate">{book.author}</p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       {book.publishedDate && (
                         <p className="text-xs text-slate-400">{book.publishedDate.split('-')[0]}</p>
                       )}
-                      {book.pageCount && (
+                      {book.publisher && (
                         <>
                           <span className="text-xs text-slate-300">•</span>
-                          <p className="text-xs text-slate-400">{book.pageCount} pages</p>
+                          <p className="text-xs text-slate-400 truncate max-w-[150px]">{book.publisher}</p>
                         </>
                       )}
                     </div>
                   </div>
                   <button
-                    onClick={() => handleAddFromSearch(book)}
-                    disabled={saving}
-                    className="p-3 rounded-full bg-slate-50 text-primary opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0 disabled:opacity-50"
+                    onClick={() => handleSelectBook(book)}
+                    className="px-4 py-2 rounded-lg bg-slate-50 text-primary font-bold text-sm hover:bg-slate-100 transition-colors"
                   >
-                    {saving ? <Loader2 className="animate-spin" size={20} /> : <Plus size={20} />}
+                    {t('addBook.buttons.select')}
                   </button>
                 </div>
               ))
@@ -260,8 +267,8 @@ export default function AddBookPage() {
                 <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="text-slate-300" size={32} />
                 </div>
-                <p className="text-muted">No books found</p>
-                <p className="text-sm text-slate-400 mt-1">Try a different search term</p>
+                <p className="text-muted">{t('addBook.noResults')}</p>
+                <p className="text-sm text-slate-400 mt-1">{t('addBook.tryAgain')}</p>
               </div>
             )}
 
@@ -271,7 +278,7 @@ export default function AddBookPage() {
                 <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="text-slate-300" size={32} />
                 </div>
-                <p className="text-muted">Type to search for books</p>
+                <p className="text-muted">{t('addBook.startTyping')}</p>
               </div>
             )}
           </div>
@@ -281,7 +288,7 @@ export default function AddBookPage() {
           {/* Manual Entry Form */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Book Title *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('addBook.form.title')} *</label>
               <input
                 type="text"
                 name="title"
@@ -289,25 +296,47 @@ export default function AddBookPage() {
                 onChange={handleInputChange}
                 required
                 className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                placeholder="e.g. The Psychology of Money"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Author</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('addBook.form.author')}</label>
               <input
                 type="text"
                 name="author"
                 value={formData.author}
                 onChange={handleInputChange}
                 className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                placeholder="e.g. Morgan Housel"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Total Pages</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('addBook.form.publisher')}</label>
+                <input
+                  type="text"
+                  name="publisher"
+                  value={formData.publisher}
+                  onChange={handleInputChange}
+                  className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('addBook.form.publishedDate')}</label>
+                <input
+                  type="text"
+                  name="published_date"
+                  value={formData.published_date}
+                  onChange={handleInputChange}
+                  className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                  placeholder="YYYY-MM-DD"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('addBook.form.totalPages')}</label>
                 <input
                   type="number"
                   name="total_pages"
@@ -315,22 +344,32 @@ export default function AddBookPage() {
                   onChange={handleInputChange}
                   min="0"
                   className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  placeholder="0"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('addBook.form.status')}</label>
                 <select
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
                   className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all appearance-none"
                 >
-                  <option value="toread">To Read</option>
-                  <option value="reading">Reading</option>
-                  <option value="finished">Finished</option>
+                  <option value="toread">{t('library.tabs.toread')}</option>
+                  <option value="reading">{t('library.tabs.reading')}</option>
+                  <option value="finished">{t('library.tabs.finished')}</option>
                 </select>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('addBook.form.isbn')}</label>
+              <input
+                type="text"
+                name="isbn"
+                value={formData.isbn}
+                onChange={handleInputChange}
+                className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              />
             </div>
           </div>
 
@@ -342,11 +381,11 @@ export default function AddBookPage() {
             {saving ? (
               <>
                 <Loader2 className="animate-spin" size={18} />
-                Adding...
+                {t('addBook.buttons.adding')}
               </>
             ) : (
               <>
-                Add to Library
+                {t('addBook.buttons.addToLibrary')}
                 <ArrowRight size={18} />
               </>
             )}

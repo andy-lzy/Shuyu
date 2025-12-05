@@ -1,0 +1,118 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "back": "Back"
+    },
+    "auth": {
+        "welcome": "Welcome Back",
+        "subtitle": "Your personal wisdom library awaits",
+        "email": "Email",
+        "password": "Password",
+        "signIn": "Sign In",
+        "signUp": "Create Account",
+        "noAccount": "Don't have an account?",
+        "hasAccount": "Already have an account?",
+        "loggingIn": "Signing in...",
+        "signingUp": "Creating account..."
+    },
+    "library": {
+        "title": "My Library",
+        "subtitle": "Your collection of wisdom",
+        "empty": "Your library is empty",
+        "addFirst": "Add your first book",
+        "search": "Search books...",
+        "tabs": {
+            "all": "All Books",
+            "toread": "To Read",
+            "reading": "Reading",
+            "finished": "Finished"
+        }
+    },
+    "nav": {
+        "focus": "Focus",
+        "library": "Library",
+        "add": "Add Book",
+        "profile": "Profile"
+    },
+    "profile": {
+        "title": "Profile",
+        "signOut": "Sign Out",
+        "language": "Language",
+        "english": "English",
+        "chinese": "Chinese"
+    },
+    "addBook": {
+        "title": "Add Book",
+        "subtitle": "Build your library of wisdom",
+        "searchTab": "Search",
+        "manualTab": "Manual",
+        "searchPlaceholder": "Search by title, author, or ISBN...",
+        "searching": "Searching books...",
+        "noResults": "No books found",
+        "tryAgain": "Try a different search term",
+        "startTyping": "Type to search for books",
+        "foundResults": "Found {{count}} results",
+        "form": {
+            "title": "Book Title",
+            "author": "Author",
+            "publisher": "Publisher",
+            "publishedDate": "Published Date",
+            "isbn": "ISBN",
+            "totalPages": "Total Pages",
+            "status": "Status",
+            "coverUrl": "Cover URL"
+        },
+        "buttons": {
+            "addToLibrary": "Add to Library",
+            "adding": "Adding...",
+            "select": "Select"
+        },
+        "success": "Book added successfully! Redirecting..."
+    },
+    "bookDetails": {
+        "pages": "{{count}} pages",
+        "publisher": "Publisher",
+        "published": "Published",
+        "isbn": "ISBN",
+        "status": "Status",
+        "delete": "Delete Book",
+        "confirmDelete": "Are you sure you want to delete this book?",
+        "nuggets": "Nuggets",
+        "addNugget": "Add Nugget",
+        "noNuggets": "No nuggets yet. Add your first one!",
+        "nuggetPlaceholder": "Write your nugget here...",
+        "page": "Page",
+        "note": "Note (optional)",
+        "tags": "Tags (comma separated)",
+        "saveNugget": "Save Nugget"
+    },
+    "focus": {
+        "title": "Focus",
+        "subtitle": "Your daily dose of wisdom",
+        "empty": "No nuggets found. Start reading!",
+        "share": "Share",
+        "favorite": "Favorite"
+    },
+    "share": {
+        "title": "Share Nugget",
+        "copyLink": "Copy Link",
+        "copied": "Copied!",
+        "shareVia": "Share via",
+        "twitter": "Twitter",
+        "whatsapp": "WhatsApp",
+        "email": "Email"
+    },
+    "sharedPage": {
+        "saveToLibrary": "Save to My Library",
+        "saving": "Saving...",
+        "loginToSave": "Login to Save",
+        "saved": "Saved!",
+        "appTitle": "Shuyu",
+        "appSubtitle": "Share wisdom from books"
+    }
+}

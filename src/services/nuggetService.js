@@ -24,12 +24,47 @@ export async function getNuggets() {
 /**
  * Fetch nuggets for a specific book
  */
-export async function getNuggetsByBook(bookId) {
+export async function getNuggetsByBookId(bookId) {
     const { data, error } = await supabase
         .from('nuggets')
         .select('*')
         .eq('book_id', bookId)
         .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+}
+
+/**
+ * Get a random nugget for the Focus page
+ */
+export async function getRandomNugget() {
+    // First get count
+    const { count, error: countError } = await supabase
+        .from('nuggets')
+        .select('*', { count: 'exact', head: true });
+
+    if (countError) throw countError;
+
+    if (count === 0) return null;
+
+    // Get random offset
+    const randomOffset = Math.floor(Math.random() * count);
+
+    const { data, error } = await supabase
+        .from('nuggets')
+        .select(`
+            *,
+            book:books (
+                id,
+                title,
+                author,
+                cover_url
+            )
+        `)
+        .range(randomOffset, randomOffset)
+        .limit(1)
+        .single();
 
     if (error) throw error;
     return data;
